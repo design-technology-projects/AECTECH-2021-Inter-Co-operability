@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - VRPlayer
+  - MiniWorldCamera
+  - ShowInMiniWorld
+  - Dude
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - Avatars
+  - GR_Layer
+  - PostProcessing
+  - 
+  - BimFilterSelect
+  - BimFilterOthers
+  - Gizmo
+  - PlaneSelection
+  - BaseBeam
+  - Beam
+  - 
+  - MeasureToolCursor
+  - MeasureToolLine
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - MARS Simulation Environment
+  - HMDOnly
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0

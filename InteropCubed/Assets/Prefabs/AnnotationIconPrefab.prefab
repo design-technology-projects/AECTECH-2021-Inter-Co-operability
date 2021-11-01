@@ -382,12 +382,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectRef:
     annotationComment: 
+    annotationAssignee: 
+    annotationMesh: {fileID: 0}
     theObject: {fileID: 0}
     Id: 0
     Category: 
     Document: 
     Comments: 
+    Assignee: 
     TypeMask: 
     PhaseCreated: 
     Length: 
     Area: 
+  iconRef: {fileID: 6427164607332855159}

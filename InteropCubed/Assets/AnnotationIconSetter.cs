@@ -5,8 +5,6 @@ using UnityEngine;
 public class AnnotationIconSetter : MonoBehaviour
 {
     public AnnotationsHandler.AnnotationObject objectRef;
-    public GameObject iconRef;
-    public UnityEngine.UI.Toggle visibilityToggle;
 
     bool isOn = false;
     Unity.Reflect.Viewer.UI.UIProjectStateData oldData;
@@ -35,9 +33,5 @@ public class AnnotationIconSetter : MonoBehaviour
         }
 
     }
-    public void ToggleVisibility(bool a)
-    {
-        iconRef.SetActive(a);
-        visibilityToggle.SetIsOnWithoutNotify(!a);
-    }
+
 }

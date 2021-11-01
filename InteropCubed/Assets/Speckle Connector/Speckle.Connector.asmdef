@@ -1,3 +1,14 @@
 {
-	"name": "Speckle.Connector"
+    "name": "Speckle.Connector",
+    "rootNamespace": "Speckle",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

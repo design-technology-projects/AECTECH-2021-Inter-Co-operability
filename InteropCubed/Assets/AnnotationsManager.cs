@@ -11,47 +11,24 @@ public class AnnotationsManager : MonoBehaviour
 
     // list to be populated with all annotation objects.
     // both the ones I make and the ones comming from Speckle
-    public List<AnnotationsHandler.AnnotationObject> _AnnotationsObjectStorage;
-    public List<Annotation> AnnotationsObjectStorage;
+    public List<AnnotationsHandler.AnnotationObject> AnnotationsObjectStorage;
     public List<AnnotationIconSetter> AnnotationIconStorage;
 
     public void AddToStorage(AnnotationsHandler.AnnotationObject toAdd, AnnotationIconSetter theIcon)
     {
         annotationUIButton.SetActive(true);
 
-        _AnnotationsObjectStorage.Add(toAdd);
-        AnnotationsObjectStorage.Add( (Annotation) toAdd);
+        AnnotationsObjectStorage.Add(toAdd);
         AnnotationIconStorage.Add(theIcon);
-
         var nInList = Instantiate(listAnnotationItem, listAnnotationItem.transform.parent);
         var name = toAdd.theObject.name.Substring(0, Mathf.Min(toAdd.theObject.name.Length, 25));
         nInList.name = name;
-
-        var button = nInList.GetComponentInChildren<UnityEngine.UI.Button>();
-        button.onClick.AddListener(() => {
-            theIcon.SelectObject();
-            listAnnotationItem.transform.parent.parent.GetComponent<ToggleGameobject>().ToggleGameObject(false);
-        });
-
-        var visibilityToggle = nInList.GetComponentInChildren<UnityEngine.UI.Toggle>();
-        theIcon.visibilityToggle = visibilityToggle;
-        visibilityToggle.onValueChanged.AddListener((a) => {
-            theIcon.ToggleVisibility(!a);});
-
+        var button = nInList.GetComponent<UnityEngine.UI.Button>();
+        button.onClick.AddListener(()=> { theIcon.SelectObject();
+            listAnnotationItem.transform.parent.parent.GetComponent<ToggleGameobject>().ToggleGameObject(false); });
         button.GetComponentInChildren<TMPro.TMP_Text>().text = name;
         nInList.SetActive(true);
 
-    }
-
-
-    bool allvisibility = false;
-    public void ToggleAllIconVisibility()
-    {
-        allvisibility = !allvisibility;
-        foreach (var icon in AnnotationIconStorage)
-        {
-            icon.ToggleVisibility(allvisibility);
-        }
     }
 
     // Start is called before the first frame update
@@ -65,8 +42,7 @@ public class AnnotationsManager : MonoBehaviour
         {
             instance = this;
         }
-        _AnnotationsObjectStorage = new List<AnnotationsHandler.AnnotationObject>();
-        AnnotationsObjectStorage = new List<Annotation>();
+        AnnotationsObjectStorage        = new List<AnnotationsHandler.AnnotationObject>();
         AnnotationIconStorage = new List<AnnotationIconSetter>();
     }
 

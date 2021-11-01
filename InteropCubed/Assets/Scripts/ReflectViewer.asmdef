@@ -26,7 +26,8 @@
         "Unity.Reflect.Multiplayer",
         "Unity.Reflect.Viewer.MeasureTool",
         "Unity.SpatialFrameworkCore",
-        "VivoxUnity"
+        "VivoxUnity",
+        "Speckle.Connector"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -36,7 +37,8 @@
         "Reflect.dll",
         "MLAPI.dll",
         "Reflect.Multiplayer.dll",
-        "Reflect.Utils.dll"
+        "Reflect.Utils.dll",
+        "SpeckleCore2.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

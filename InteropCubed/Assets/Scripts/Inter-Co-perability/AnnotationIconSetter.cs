@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AnnotationIconSetter : MonoBehaviour
 {
-    public AnnotationsHandler.AnnotationObject objectRef;
+    public AnnotationObject objectRef;
     public GameObject iconRef;
     public UnityEngine.UI.Toggle visibilityToggle;
 

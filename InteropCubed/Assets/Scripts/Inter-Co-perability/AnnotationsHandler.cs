@@ -7,6 +7,7 @@ using Unity.Reflect.Viewer;
 using System.Linq;
 using TMPro;
 using System;
+using System.Threading.Tasks;
 
 public class AnnotationsHandler : MonoBehaviour
 {
@@ -15,8 +16,8 @@ public class AnnotationsHandler : MonoBehaviour
     [Header("Scene references")]
     public Unity.Reflect.Viewer.UI.RightSideBarController RightSideBarController;
     public Unity.Reflect.Viewer.UI.UIStateManager UIStateManager;
-    public Speckle.ConnectorUnity.Sender sender;
-    public Speckle.ConnectorUnity.Receiver receiver;
+
+    public SpeckleAnnotationManager speckleAnnotationManager;
 
     public GameObject AnnotationsIconPrefab;
     private GameObject AnnotationsIcon;
@@ -45,6 +46,7 @@ public class AnnotationsHandler : MonoBehaviour
 
     public TMP_InputField inputCommentField;
     public TMP_InputField inputAssigneeField;
+
     [HideInInspector] public ToggleGameobject inputCommentToggleClas;
     private GameObject parentAnnotationIcons;
     public void AddAnnotation()
@@ -73,7 +75,8 @@ public class AnnotationsHandler : MonoBehaviour
 
     public void SendAnnotations()
     {
-        var storagelist = AnnotationsManager.instance._AnnotationsObjectStorage;
+        var storagelist = AnnotationsManager.instance.AnnotationsObjectStorage;
+
         if (SelectedObject != new AnnotationObject())
             if (!storagelist.Contains(SelectedObject))
             {
@@ -81,6 +84,7 @@ public class AnnotationsHandler : MonoBehaviour
                 AnnotationsIcon = Instantiate(AnnotationsIconPrefab, parentAnnotationIcons.transform);
                 var theSetter = AnnotationsIcon.GetComponent<AnnotationIconSetter>();
                 theSetter.objectRef = SelectedObject;
+
                 AnnotationsIcon.transform.SetPositionAndRotation(SelectedObject.theObject.transform.position, Quaternion.identity);
                 var objectPos = SelectedObject.theObject.GetComponent<SyncObjectBinding>().bounds;
                 AnnotationsIcon.transform.localPosition = objectPos.center + new Vector3(0, 20.0f, 0);
@@ -89,6 +93,9 @@ public class AnnotationsHandler : MonoBehaviour
                 line.SetPosition(0, AnnotationsIcon.transform.GetChild(0).position);
                 line.SetPosition(1, objectPos.center);
                 AnnotationsManager.instance.AddToStorage(SelectedObject, theSetter);
+
+                // speckle
+                speckleAnnotationManager.SendAnnotation();
             }
 
     }
@@ -108,7 +115,7 @@ public class AnnotationsHandler : MonoBehaviour
         ClearSelectedObject();
 
         Debug.Log("<color=blue> Checking if object has annotations </color>");
-        var storageList = AnnotationsManager.instance._AnnotationsObjectStorage;
+        var storageList = AnnotationsManager.instance.AnnotationsObjectStorage;
         foreach (var group in metadata.SortedByGroup())
         {
             foreach (var parameter in group.Value)
@@ -133,7 +140,9 @@ public class AnnotationsHandler : MonoBehaviour
                 {
                     Debug.Log("<color=blue> Existing Annotation Found </color>");
                     SelectedObject = receivedAnnotationObject;
-                    inputCommentField.SetTextWithoutNotify(SelectedObject.annotationComment); ;
+                    inputCommentField.SetTextWithoutNotify(SelectedObject.annotationComment);
+                    inputAssigneeField.SetTextWithoutNotify(SelectedObject.annotationAssignee);
+
                     return;
                 }
             }
@@ -220,22 +229,43 @@ public class AnnotationsHandler : MonoBehaviour
         parentAnnotationIcons.name = "parentAnnotationIcons";
         parentAnnotationIcons.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
 
-
+        //speckleAnnotationManager = speckleManager.GetComponent<SpeckleAnnotationManager>();
     }
 
-    public void Receive()
+    public void ReceiveAnnotation()
     {
+        ReceiveAsync();
+    }
+
+    public async Task ReceiveAsync()
+    {
+        // clean up old annotations
+        CleanUpAnnotationStorage();
+
+
         Debug.Log("<color=green> Testing REceive now! </color>");
+        await speckleAnnotationManager.Receive();
         StartCoroutine(ReceivedAnnotations());
+    }
+    private void CleanUpAnnotationStorage()
+    {
+        AnnotationsManager.instance.AnnotationsObjectStorage.ForEach(x => Destroy(x.annotationMesh));
+        AnnotationsManager.instance.AnnotationsObjectStorage.ForEach(x => Destroy(x.theObject));
+        if (AnnotationsManager.instance.AnnotationsObjectStorage != null) AnnotationsManager.instance.AnnotationsObjectStorage.Clear();
+
+        AnnotationsManager.instance.AnnotationIconStorage.ForEach(x => Destroy(x.iconRef));
+        if (AnnotationsManager.instance.AnnotationIconStorage != null) AnnotationsManager.instance.AnnotationIconStorage.Clear();
+
+        AnnotationsManager.instance.listAnnotationItems.ForEach(x => Destroy(x));
     }
 
     public IEnumerator ReceivedAnnotations()
     {
         var metas = FindSceneObjectsOfType(typeof(Metadata)) as Metadata[];
         // example receiving
-        foreach (var annootationReceived in AnnotationReceivingExample.receivedAnnotations)
+        foreach (var receivedAnnotation in speckleAnnotationManager.streamAnnotations)
         {
-            Debug.LogFormat("<color=green> Testing REceive on {0}! </color>", annootationReceived.ElementRevitId);
+            Debug.LogFormat("<color=green> Testing REceive on {0}! </color>", receivedAnnotation.ElementRevitId);
             yield return null;
             GameObject found = null;
             for (int i = 0; i < metas.Length; i++)
@@ -244,8 +274,10 @@ public class AnnotationsHandler : MonoBehaviour
                     foreach (var parameter in group.Value)
                         if (parameter.Key == "Id")
                         {
-                            if (parameter.Value.value == annootationReceived.ElementRevitId)
-                            { found = metas[i].gameObject; continue; }
+                            if (parameter.Value.value == receivedAnnotation.ElementRevitId)
+                            {
+                                found = metas[i].gameObject; continue;
+                            }
                         }
             }
 
@@ -260,7 +292,7 @@ public class AnnotationsHandler : MonoBehaviour
                 //AnnotationsHandler.instance.UIStateManager.setUIProjectStateData(newPS);
                 //AnnotationsHandler.instance.UIStateManager.ForceSendProjectStateChangedEvent();
 
-                var convertedAnnotation = (AnnotationObject)annootationReceived;
+                var convertedAnnotation = (AnnotationObject)receivedAnnotation;
                 convertedAnnotation.theObject = found;
                 var _AnnotationsIcon = Instantiate(AnnotationsIconPrefab, parentAnnotationIcons.transform);
                 var theSetter = _AnnotationsIcon.GetComponent<AnnotationIconSetter>();
@@ -308,56 +340,109 @@ public class AnnotationsHandler : MonoBehaviour
         public string type;
 
     }
-    [System.Serializable]
-    public class AnnotationObject
-    {
-        public Dictionary<string, string> values =
-            new Dictionary<string, string>();
-        public string annotationComment;
-        public string annotationAssignee;
-        public GameObject annotationMesh;
-        public GameObject theObject;
+    //[System.Serializable]
+    //public class AnnotationObject
+    //{
+    //    public Dictionary<string, string> values = new Dictionary<string, string>();
+    //    public string annotationComment;
+    //    public string annotationAssignee;
+    //    public GameObject annotationMesh;
+    //    public GameObject theObject;
 
-        public static explicit operator Annotation(AnnotationObject obj)
-        {
-            var SpeckleAnnotation = new Annotation()
-            {
-                ElementRevitId = obj.Id.ToString(),
-                AnnotationId = RandomString(5),
-                Assignee = obj.annotationAssignee,
-                Message = obj.annotationComment
-            };
+    //    public static explicit operator Annotation(AnnotationObject obj)
+    //    {
+    //        var SpeckleAnnotation = new Annotation()
+    //        {
+    //            ElementRevitId = obj.Id.ToString(),
+    //            AnnotationId = RandomString(5),
+    //            Assignee = obj.annotationAssignee,
+    //            Message = obj.annotationComment
+    //        };
 
-            SpeckleAnnotation.Mesh = obj.annotationMesh == null ? null : GameobjectToBaseMesh(obj.annotationMesh);
+    //        SpeckleAnnotation.Mesh = obj.annotationMesh == null ? null : GameobjectToBaseMesh(obj.annotationMesh);
 
-            return SpeckleAnnotation;
-        }
-        // visible debug values _ class functions with dictionary
-        public int Id;
-        public string Category;
-        public string Document;
-        public string Comments;
-        public string Assignee;
-        public string TypeMask;
-        public string PhaseCreated;
-        public string Length;
-        public string Area;
+    //        return SpeckleAnnotation;
+    //    }
+    //    // visible debug values _ class functions with dictionary
+    //    public int Id;
+    //    public string Category;
+    //    public string Document;
+    //    public string Comments;
+    //    public string Assignee;
+    //    public string TypeMask;
+    //    public string PhaseCreated;
+    //    public string Length;
+    //    public string Area;
 
-        public static Speckle.Core.Models.Base GameobjectToBaseMesh(GameObject obj)
-        {
-            var converter = new Objects.Converter.Unity.ConverterUnity();
-            var convertedObjj = AnnotationsHandler.instance.sender.RecurseTreeToNative(obj);
-            return convertedObjj;
-        }
-        public static string RandomString(int length)
-        {
-            const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-              .Select(s => s[UnityEngine.Random.Range(0, chars.Length - 1)]).ToArray());
-        }
+    //    public static Speckle.Core.Models.Base GameobjectToBaseMesh(GameObject obj)
+    //    {
+    //        var converter = new Objects.Converter.Unity.ConverterUnity();
+    //        var convertedObjj = AnnotationsHandler.instance.sender.RecurseTreeToNative(obj);
+    //        return convertedObjj;
+    //    }
+    //    public static string RandomString(int length)
+    //    {
+    //        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    //        return new string(Enumerable.Repeat(chars, length)
+    //          .Select(s => s[UnityEngine.Random.Range(0, chars.Length - 1)]).ToArray());
+    //    }
 
-    }
+    //}
 }
+
+
+[System.Serializable]
+public class AnnotationObject
+{
+    public Dictionary<string, string> values = new Dictionary<string, string>();
+    public string annotationComment;
+    public string annotationAssignee;
+    public GameObject annotationMesh;
+    public GameObject theObject;
+
+    public static explicit operator Annotation(AnnotationObject obj)
+    {
+        var SpeckleAnnotation = new Annotation()
+        {
+            ElementRevitId = obj.Id.ToString(),
+            AnnotationId = RandomString(5),
+            Assignee = obj.annotationAssignee,
+            Message = obj.annotationComment
+        };
+
+        SpeckleAnnotation.Mesh = obj.annotationMesh == null ? null : GameobjectToBaseMesh(obj.annotationMesh);
+
+        return SpeckleAnnotation;
+    }
+
+
+    // visible debug values _ class functions with dictionary
+    public int Id;
+    public string Category;
+    public string Document;
+    public string Comments;
+    public string Assignee;
+    public string TypeMask;
+    public string PhaseCreated;
+    public string Length;
+    public string Area;
+
+    public static Speckle.Core.Models.Base GameobjectToBaseMesh(GameObject obj)
+    {
+        var converter = new Objects.Converter.Unity.ConverterUnity();
+        var convertedObjj = AnnotationUtils.RecurseTreeToNative(obj);
+        return convertedObjj;
+    }
+    public static string RandomString(int length)
+    {
+        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        return new string(Enumerable.Repeat(chars, length)
+          .Select(s => s[UnityEngine.Random.Range(0, chars.Length - 1)]).ToArray());
+    }
+
+}
+
+
 public class Annotation : Speckle.Core.Models.Base
 {
     public string ElementRevitId { get; set; }
@@ -366,9 +451,9 @@ public class Annotation : Speckle.Core.Models.Base
     public string Message { get; set; }
     public Speckle.Core.Models.Base Mesh { get; set; }
 
-    public static explicit operator AnnotationsHandler.AnnotationObject(Annotation obj)
+    public static explicit operator AnnotationObject(Annotation obj)
     {
-        var ReflectAnnotation = new AnnotationsHandler.AnnotationObject()
+        var ReflectAnnotation = new AnnotationObject()
         {
             Id = int.Parse(obj.ElementRevitId),
             annotationComment = obj.Message,
@@ -388,19 +473,19 @@ public class AnnotationReceivingExample
     {
         new Annotation(){
             ElementRevitId = "26921472",
-                AnnotationId = AnnotationsHandler.AnnotationObject.RandomString(5),
+                AnnotationId = AnnotationObject.RandomString(5),
                 Assignee = "joe1",
                 Message = "TestAnnotation1"
         },
         new Annotation(){
             ElementRevitId = "26224929",
-                AnnotationId = AnnotationsHandler.AnnotationObject.RandomString(5),
+                AnnotationId = AnnotationObject.RandomString(5),
                 Assignee ="Marie2",
                 Message = "TestAnnotation2",
         },
         new Annotation(){
             ElementRevitId = "2115662",
-                AnnotationId = AnnotationsHandler.AnnotationObject.RandomString(5),
+                AnnotationId = AnnotationObject.RandomString(5),
                 Assignee = "George3",
                 Message = "TestAnnotation3"
         }

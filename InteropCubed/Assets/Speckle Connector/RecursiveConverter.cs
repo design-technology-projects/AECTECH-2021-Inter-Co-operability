@@ -44,7 +44,7 @@ namespace Speckle.ConnectorUnity
             if (members.Count() == 1)
             {
                 var go = RecurseTreeToNative(@base[members.First()]);
-                go.name = members.First();
+                if (go != null) go.name = members.First();
                 return go;
             }
             else

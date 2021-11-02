@@ -1,4 +1,4 @@
-﻿using Objects.Converter.Unity;
+using Objects.Converter.Unity;
 using Speckle.Core.Api;
 using Speckle.Core.Api.SubscriptionModels;
 using Speckle.Core.Credentials;
@@ -38,14 +38,14 @@ namespace Speckle.ConnectorUnity
         public void Send(string streamId, List<GameObject> gameObjects, Account account = null,
           Action<string> onDataSentAction = null,
           Action<ConcurrentDictionary<string, int>> onProgressAction = null,
-          Action<string, Exception> onErrorAction = null)
+          Action<string, Exception> onErrorAction = null, string commitMessage = "Data from Unity!")
         {
             try
             {
                 var data = ConvertRecursivelyToSpeckle(gameObjects);
                 Task.Run(async () =>
                 {
-                    var res = await Helpers.Send(streamId, data, "Data from unity!",
+                    var res = await Helpers.Send(streamId, data, commitMessage,
               sourceApplication: Applications.Unity,
               totalChildrenCount: gameObjects.Count(),
               account: account,
@@ -64,13 +64,13 @@ namespace Speckle.ConnectorUnity
         public void Send(string streamId, Base data, Account account = null,
           Action<string> onDataSentAction = null,
           Action<ConcurrentDictionary<string, int>> onProgressAction = null,
-          Action<string, Exception> onErrorAction = null)
+          Action<string, Exception> onErrorAction = null, string commitMessage = "Data from Unity!")
         {
             try
             {
                 Task.Run(async () =>
                 {
-                    var res = await Helpers.Send(streamId, data, "Data from unity!",
+                    var res = await Helpers.Send(streamId, data, commitMessage,
                       sourceApplication: Applications.Unity,
                       totalChildrenCount: 1,
                       account: account,

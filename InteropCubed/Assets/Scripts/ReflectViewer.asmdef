@@ -38,7 +38,8 @@
         "MLAPI.dll",
         "Reflect.Multiplayer.dll",
         "Reflect.Utils.dll",
-        "SpeckleCore2.dll"
+        "SpeckleCore2.dll",
+        "Speckle.Newtonsoft.Json.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

@@ -167,6 +167,7 @@ namespace Unity.Reflect.Viewer.UI
 
                 AnnotationsHandler.instance.inputCommentToggleClas.ToggleGameObject(false);
                 AnnotationsHandler.instance.inputCommentField.SetTextWithoutNotify("");
+                AnnotationsHandler.instance.inputAssigneeField.SetTextWithoutNotify("");
 
                 var isSelected = currentSelectedObject != null;
                 m_NoSelectionText.gameObject.SetActive(!isSelected);
@@ -200,6 +201,7 @@ namespace Unity.Reflect.Viewer.UI
                     AnnotationsHandler.instance.ClearSelectedObject();
                     AnnotationsHandler.instance.inputCommentToggleClas.ToggleGameObject(false);
                     AnnotationsHandler.instance.inputCommentField.SetTextWithoutNotify("");
+                    AnnotationsHandler.instance.inputAssigneeField.SetTextWithoutNotify("");
                 }
             }
 

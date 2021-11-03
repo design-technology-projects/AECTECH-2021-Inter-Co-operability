@@ -6,6 +6,8 @@ using Unity.Reflect.Data;
 using Unity.Reflect.Viewer;
 using System.Linq;
 using TMPro;
+using Speckle;
+using System;
 
 public class AnnotationsHandler : MonoBehaviour
 {
@@ -14,6 +16,8 @@ public class AnnotationsHandler : MonoBehaviour
     [Header("Scene references")]
     public Unity.Reflect.Viewer.UI.RightSideBarController RightSideBarController;
     public Unity.Reflect.Viewer.UI.UIStateManager UIStateManager;
+    public Speckle.ConnectorUnity.Sender sender;
+    public Speckle.ConnectorUnity.Receiver receiver;
 
     public GameObject AnnotationsIconPrefab;
     private GameObject AnnotationsIcon;
@@ -40,7 +44,8 @@ public class AnnotationsHandler : MonoBehaviour
            "Vertical Mullions"
     };
 
-    [HideInInspector] public TMP_InputField inputCommentField;
+    public TMP_InputField inputCommentField;
+    public TMP_InputField inputAssigneeField;
     [HideInInspector] public ToggleGameobject inputCommentToggleClas;
     private GameObject parentAnnotationIcons;
     public void AddAnnotation()
@@ -53,6 +58,18 @@ public class AnnotationsHandler : MonoBehaviour
         Debug.Log("<color=yellow> Adding annotation text! </color>");
         Debug.LogFormat("<color=green> Comment: {0} </color>", text);
         SelectedObject.annotationComment = text;
+    }
+    public void AddAnnotationAssignee(string text)
+    {
+        Debug.Log("<color=yellow> Adding annotation Assignee! </color>");
+        Debug.LogFormat("<color=green> Assignee: {0} </color>", text);
+        SelectedObject.annotationAssignee = text;
+    }
+    public void AddAnnotationMEsh(GameObject annotationMesh)
+    {
+        Debug.Log("<color=yellow> Adding annotation Mesh! </color>");
+        Debug.LogFormat("<color=green> Annotaton Mesh: {0} </color>", annotationMesh.name);
+        SelectedObject.annotationMesh = annotationMesh ;
     }
 
     public void SendAnnotations()
@@ -198,7 +215,6 @@ public class AnnotationsHandler : MonoBehaviour
             instance = this;
         }
 
-        inputCommentField = AnnotationsWindow.GetComponentInChildren<TMP_InputField>();
         inputCommentToggleClas = AnnotationsWindow.GetComponent<ToggleGameobject>();
 
         parentAnnotationIcons = new GameObject();
@@ -244,17 +260,53 @@ public class AnnotationsHandler : MonoBehaviour
         public Dictionary<string, string> values =
             new Dictionary<string, string>();
         public string annotationComment;
-
+        public string annotationAssignee;
+        public GameObject annotationMesh;
         public GameObject theObject;
+
+        public static explicit operator Annotation(AnnotationObject obj)
+        {
+            return new Annotation() {
+                ElementRevitId = obj.Id.ToString(),
+                AnnotationId = RandomString(5),
+                Assignee = obj.annotationAssignee,
+                Message = obj.annotationComment,
+                Mesh = GameobjectToBaseMesh(obj.annotationMesh)
+            };
+        }
         // visible debug values _ class functions with dictionary
         public int Id;
         public string Category;
         public string Document;
         public string Comments;
+        public string Assignee;
         public string TypeMask;
         public string PhaseCreated;
         public string Length;
         public string Area;
 
+        public static Speckle.Core.Models.Base GameobjectToBaseMesh(GameObject obj)
+        {
+            var converter = new Objects.Converter.Unity.ConverterUnity();
+            var convertedObjj = AnnotationsHandler.instance.sender.RecurseTreeToNative(obj);
+            return convertedObjj;
+        }
+        public static string RandomString(int length)
+        {
+            const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[UnityEngine.Random.Range(0,chars.Length-1)]).ToArray());
+        }
+
     }
 }
+public class Annotation : Speckle.Core.Models.Base
+{
+    public string ElementRevitId { get; set; }
+    public string AnnotationId { get; set; }
+    public string Assignee { get; set; }
+    public string Message { get; set; }
+    public Speckle.Core.Models.Base Mesh { get; set; }
+
+}
+

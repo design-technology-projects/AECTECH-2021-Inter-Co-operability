@@ -3,4 +3,5 @@
     <assembly fullname="Unity.Reflect.Multiplayer" preserve="all"/>
     <assembly fullname="Reflect.Multiplayer" preserve="all"/>
     <assembly fullname="Unity.Reflect.Annotations" preserve="all"/>
+    <assembly fullname="SpeckleCore2" preserve="all"/>
 </linker>

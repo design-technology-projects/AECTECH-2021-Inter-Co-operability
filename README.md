@@ -18,10 +18,10 @@ First, install [Unity Hub](https://unity3d.com/get-unity/download). To donwload 
 ### Reflect Review
 Go to [Reflect Review](https://docs.unity3d.com/reflect/Review/index.html) and browse to the [Installing and uninstalling section](https://docs.unity3d.com/reflect/Review/ReflectInstaller.html). Follow the instructions to download and install Unity Reflect Review.
 
-### Revit 2020
+### Revit 2020 (optional)
 If you don't have Revit 2020, you can find a free trial version [here](https://www.autodesk.co.uk/products/revit/overview?mktvar002=4229684%7CSEM%7C%7Bcampaignid%7D%7C%7Badgroupid%7D%7C%7BTargetId%7D&panel=buy&ef_id=Cj0KCQjww4OMBhCUARIsAILndv6ILsj9tF6DLl12raCEotlTeGOr51oxIIQ3zBKV9c12fASyZtrJzN4aAsKSEALw_wcB:G:s&s_kwcid=AL!11172!3!547489662151!p!!g!!autodesk%20revit%202020!14735951171!132842139732&mkwid=s|pcrid|547489662151|pkw|autodesk%20revit%202020|pmt|p|pdv|c|slid||pgrid|132842139732|ptaid|kwd-776154309530|pid|&utm_medium=cpc&utm_source=google&utm_campaign&utm_term=autodesk%20revit%202020&utm_content=s|pcrid|547489662151|pkw|autodesk%20revit%202020|pmt|p|pdv|c|slid||pgrid|132842139732|ptaid|kwd-776154309530|&gclid=Cj0KCQjww4OMBhCUARIsAILndv6ILsj9tF6DLl12raCEotlTeGOr51oxIIQ3zBKV9c12fASyZtrJzN4aAsKSEALw_wcB&term=1-YEAR&tab=subscription).
 
-### Rhino 7
+### Rhino 7 (optional)
 If you don't have Rhino 7, you can donwload the evaluation 90 days Rhino 7 [here](https://www.rhino3d.com/download/rhino-for-windows/evaluation).
 
 ### Clone this repository

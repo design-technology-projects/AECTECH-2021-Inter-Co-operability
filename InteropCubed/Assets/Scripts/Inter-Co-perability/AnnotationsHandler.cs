@@ -250,7 +250,6 @@ public class AnnotationsHandler : MonoBehaviour
     private void CleanUpAnnotationStorage()
     {
         AnnotationsManager.instance.AnnotationsObjectStorage.ForEach(x => Destroy(x.annotationMesh));
-        AnnotationsManager.instance.AnnotationsObjectStorage.ForEach(x => Destroy(x.theObject));
         if (AnnotationsManager.instance.AnnotationsObjectStorage != null) AnnotationsManager.instance.AnnotationsObjectStorage.Clear();
 
         AnnotationsManager.instance.AnnotationIconStorage.ForEach(x => Destroy(x.iconRef));
@@ -442,7 +441,7 @@ public class AnnotationObject
 
 }
 
-
+[System.Serializable]
 public class Annotation : Speckle.Core.Models.Base
 {
     public string ElementRevitId { get; set; }

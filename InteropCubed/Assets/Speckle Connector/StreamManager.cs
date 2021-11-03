@@ -46,5 +46,6 @@ namespace Speckle.ConnectorUnity
       return rc.ConvertRecursivelyToNative(@base,
           Branches[SelectedBranchIndex].commits.items[SelectedCommitIndex].id);
     }
+
   }
 }

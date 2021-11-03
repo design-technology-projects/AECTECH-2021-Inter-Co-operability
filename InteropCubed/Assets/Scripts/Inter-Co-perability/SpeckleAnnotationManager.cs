@@ -1,5 +1,6 @@
 using Speckle.ConnectorUnity;
 using Speckle.Core.Api;
+using Speckle.Core.Credentials;
 using Speckle.Core.Models;
 using Speckle.Core.Transports;
 using Speckle.Newtonsoft.Json;
@@ -8,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 using static AnnotationsHandler;
 
@@ -56,6 +58,7 @@ public class SpeckleAnnotationManager : MonoBehaviour
 
     public async Task Receive()
     {
+        await LoadStreams();
         if (annotationMarkups != null) Destroy(annotationMarkups);
         if (streamAnnotations != null) streamAnnotations.Clear();
 
@@ -89,6 +92,25 @@ public class SpeckleAnnotationManager : MonoBehaviour
         }
 
 
+    }
+
+    private async Task LoadStreams()
+    {
+        //EditorUtility.DisplayProgressBar("Loading streams...", "", 0);
+        manager.Streams = await manager.Client.StreamsGet();
+        //EditorUtility.ClearProgressBar();
+        //if (manager.Streams.Any())
+        //await SelectStream(0);
+
+        manager.Branches = await manager.Client.StreamGetBranches(manager.SelectedStream.id);
+        if (manager.Branches.Any())
+        {
+            manager.SelectedBranchIndex = 0;
+            if (manager.Branches[manager.SelectedBranchIndex].commits.items.Any())
+            {
+                manager.SelectedCommitIndex = 0;
+            }
+        }
     }
 
     public Base RecurseTreeToNative(GameObject o)

@@ -96,7 +96,7 @@ namespace Speckle.ConnectorUnity
       set { _streamManager.Branches = value; }
     }
 
-    private async Task LoadAccounts()
+    public async Task LoadAccounts()
     {
       //refresh accounts just in case
       Accounts = AccountManager.GetAccounts().ToList();

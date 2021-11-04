@@ -27,7 +27,8 @@
         "Unity.Reflect.Viewer.MeasureTool",
         "Unity.SpatialFrameworkCore",
         "VivoxUnity",
-        "Speckle.Connector"
+        "Speckle.Connector",
+        "Speckle.Extra"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

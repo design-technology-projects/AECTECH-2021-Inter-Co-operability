@@ -80,21 +80,24 @@ public class AnnotationsHandler : MonoBehaviour
         if (SelectedObject != new AnnotationObject())
             if (!storagelist.Contains(SelectedObject))
             {
-                //Here place the icon to indicate that annotation exists
+                // Instantiate the Annotation icon and place it above the selected for annotation object
                 AnnotationsIcon = Instantiate(AnnotationsIconPrefab, parentAnnotationIcons.transform);
                 var theSetter = AnnotationsIcon.GetComponent<AnnotationIconSetter>();
                 theSetter.objectRef = SelectedObject;
 
+                // Annotation position
                 AnnotationsIcon.transform.SetPositionAndRotation(SelectedObject.theObject.transform.position, Quaternion.identity);
                 var objectPos = SelectedObject.theObject.GetComponent<SyncObjectBinding>().bounds;
                 AnnotationsIcon.transform.localPosition = objectPos.center + new Vector3(0, 20.0f, 0);
+
+                // Vertical line connecting object and annotation
                 var line = AnnotationsIcon.GetComponentInChildren<LineRenderer>();
                 line.useWorldSpace = true;
                 line.SetPosition(0, AnnotationsIcon.transform.GetChild(0).position);
                 line.SetPosition(1, objectPos.center);
                 AnnotationsManager.instance.AddToStorage(SelectedObject, theSetter);
 
-                // speckle
+                // Send annotation to Speckle
                 speckleAnnotationManager.SendAnnotation();
             }
 
@@ -116,6 +119,7 @@ public class AnnotationsHandler : MonoBehaviour
 
         Debug.Log("<color=blue> Checking if object has annotations </color>");
         var storageList = AnnotationsManager.instance.AnnotationsObjectStorage;
+
         foreach (var group in metadata.SortedByGroup())
         {
             foreach (var parameter in group.Value)
@@ -242,7 +246,6 @@ public class AnnotationsHandler : MonoBehaviour
         // clean up old annotations
         CleanUpAnnotationStorage();
 
-
         Debug.Log("<color=green> Testing REceive now! </color>");
         await speckleAnnotationManager.Receive();
         StartCoroutine(ReceivedAnnotations());
@@ -260,6 +263,7 @@ public class AnnotationsHandler : MonoBehaviour
 
     public IEnumerator ReceivedAnnotations()
     {
+        // Scan through the objects in the scene and find an object that each received annotation is connected to
         var metas = FindSceneObjectsOfType(typeof(Metadata)) as Metadata[];
         // example receiving
         foreach (var receivedAnnotation in speckleAnnotationManager.streamAnnotations)
@@ -293,16 +297,24 @@ public class AnnotationsHandler : MonoBehaviour
 
                 var convertedAnnotation = (AnnotationObject)receivedAnnotation;
                 convertedAnnotation.theObject = found;
+
+                // Instantiate annotation icons for each received annotation in the location of the object found by ID
                 var _AnnotationsIcon = Instantiate(AnnotationsIconPrefab, parentAnnotationIcons.transform);
                 var theSetter = _AnnotationsIcon.GetComponent<AnnotationIconSetter>();
                 theSetter.objectRef = convertedAnnotation;
+
+                // Move annotation above the object
                 _AnnotationsIcon.transform.SetPositionAndRotation(found.transform.position, Quaternion.identity);
                 var objectPos = found.GetComponent<SyncObjectBinding>().bounds;
                 _AnnotationsIcon.transform.localPosition = objectPos.center + new Vector3(0, 20.0f, 0);
+
+                // Connect annotation and object with a vertical line
                 var line = _AnnotationsIcon.GetComponentInChildren<LineRenderer>();
                 line.useWorldSpace = true;
                 line.SetPosition(0, _AnnotationsIcon.transform.GetChild(0).position);
                 line.SetPosition(1, objectPos.center);
+
+                // Add AnnotationObject element to the storage
                 AnnotationsManager.instance.AddToStorage(convertedAnnotation, theSetter);
             }
         }
@@ -339,54 +351,6 @@ public class AnnotationsHandler : MonoBehaviour
         public string type;
 
     }
-    //[System.Serializable]
-    //public class AnnotationObject
-    //{
-    //    public Dictionary<string, string> values = new Dictionary<string, string>();
-    //    public string annotationComment;
-    //    public string annotationAssignee;
-    //    public GameObject annotationMesh;
-    //    public GameObject theObject;
-
-    //    public static explicit operator Annotation(AnnotationObject obj)
-    //    {
-    //        var SpeckleAnnotation = new Annotation()
-    //        {
-    //            ElementRevitId = obj.Id.ToString(),
-    //            AnnotationId = RandomString(5),
-    //            Assignee = obj.annotationAssignee,
-    //            Message = obj.annotationComment
-    //        };
-
-    //        SpeckleAnnotation.Mesh = obj.annotationMesh == null ? null : GameobjectToBaseMesh(obj.annotationMesh);
-
-    //        return SpeckleAnnotation;
-    //    }
-    //    // visible debug values _ class functions with dictionary
-    //    public int Id;
-    //    public string Category;
-    //    public string Document;
-    //    public string Comments;
-    //    public string Assignee;
-    //    public string TypeMask;
-    //    public string PhaseCreated;
-    //    public string Length;
-    //    public string Area;
-
-    //    public static Speckle.Core.Models.Base GameobjectToBaseMesh(GameObject obj)
-    //    {
-    //        var converter = new Objects.Converter.Unity.ConverterUnity();
-    //        var convertedObjj = AnnotationsHandler.instance.sender.RecurseTreeToNative(obj);
-    //        return convertedObjj;
-    //    }
-    //    public static string RandomString(int length)
-    //    {
-    //        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    //        return new string(Enumerable.Repeat(chars, length)
-    //          .Select(s => s[UnityEngine.Random.Range(0, chars.Length - 1)]).ToArray());
-    //    }
-
-    //}
 }
 
 
@@ -441,6 +405,8 @@ public class AnnotationObject
 
 }
 
+
+// This class inherits Speckle Base class. We can directly send this class to Speckle sender
 [System.Serializable]
 public class Annotation : Speckle.Core.Models.Base
 {
@@ -466,6 +432,7 @@ public class Annotation : Speckle.Core.Models.Base
     }
 }
 
+// This class is just an example of how Annotation class elements might look like
 public class AnnotationReceivingExample
 {
     public static List<Annotation> receivedAnnotations = new List<Annotation>()

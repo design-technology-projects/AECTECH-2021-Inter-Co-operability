@@ -32,5 +32,5 @@ If you are using Git BASH, follow [Cloning a repository](https://docs.github.com
 If you are using Git Desktop, navigate to the File: Clone a repository. In the pop up window, paste the https://github.com/design-technology/AECTECH-2021-Inter-Co-operability.git and select Clone button. Git Desktop should automatically ask you whether you want to enable the LFS.
 
 ### Opening the project
-Open Unity Hub and Add a project. Navigate to the folder where you cloned the repository and select folder InteropCubed. The Unity Version should be setup to 2020.3.2f1. 
+Open Unity Hub and Add a project. Navigate to the folder where you cloned the repository and select folder Intercoperability. The Unity Version should be setup to 2020.3.2f1. 
 
